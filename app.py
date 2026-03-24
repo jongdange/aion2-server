@@ -10,26 +10,20 @@ headers = {
 
 @app.route("/aion2")
 def get_character():
-    name = request.args.get("name")
+    url = request.args.get("url")
 
-    if not name:
-        return jsonify({"error": "name required"})
+    if not url:
+        return jsonify({"error": "url required"})
 
     try:
-        search_url = f"https://aion2.plaync.com/search?query={name}"
-        res = requests.get(search_url, headers=headers)
+        res = requests.get(url, headers=headers)
 
-        match = re.search(r'/ko-kr/characters/[0-9]+/[A-Za-z0-9\-_=%]+', res.text)
-        if not match:
-            return jsonify({"error": "not found"})
-
-        char_url = "https://aion2.plaync.com" + match.group()
-        res2 = requests.get(char_url, headers=headers)
-
-        power_match = re.search(r'"combatPower":([0-9]+)', res2.text)
+        power_match = re.search(r'"combatPower":([0-9]+)', res.text)
         power = power_match.group(1) if power_match else "0"
 
-        return jsonify({"name": name, "power": power})
+        return jsonify({
+            "power": power
+        })
 
     except Exception as e:
         return jsonify({"error": str(e)})
